@@ -1,0 +1,37 @@
+import mongoose,{Schema,model} from "mongoose";
+import bcrypt from "bcrypt";
+
+const userSchema = new Schema({
+    username: {
+        type: String,
+        required: [true, "Username is required"],
+        trim: true,
+        unique: true
+    },
+    password: {
+        type: String,
+        minlength: [6, "Password must be at least 6 characters"],
+        required: [true, "Password is required"]
+    },
+    role: {
+        type: String,
+        default: "user"
+    },
+     history:[{type:mongoose.Schema.Types.ObjectId, ref:"Order"}],
+     userRank:{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Rank"
+    },
+     watchHistory:[{
+        movie:{type:mongoose.Schema.Types.ObjectId, ref:"Movie",required:true},
+        date:{type:Date,default:Date.now}
+     }]
+})
+userSchema.pre("save", async function(next){
+    if(!this.isModified("password")){
+        next();
+    }
+    this.password = await bcrypt.hash(this.password, 12);
+    next();
+})
+export const User = mongoose.model.User || model("User", userSchema);
