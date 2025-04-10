@@ -9,7 +9,6 @@ const cinemaSchema = new Schema({
         type: String,
         required: [true, "Location is required"],
         trim: true
-    },
-    rooms: [{ type: mongoose.Schema.Types.ObjectId, ref: "Room" }]
+    }
 })
 export const Cinema = mongoose.model.Cinema || mongoose.model("Cinema", cinemaSchema);

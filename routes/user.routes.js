@@ -1,4 +1,4 @@
-//chatgpt .chua review dang comment hoi nhieu cho
+//tam thoi thieu auth vi chua review code chatgpt
 import express from 'express';
 import { body } from 'express-validator';
 // import { validate } from '../middleware/validator.js';
@@ -9,7 +9,8 @@ import {
   updateUser,
   deleteUser,
   getUserRank,
-  getUserPoints
+  getUserPoints,
+  registerUser
 } from '../controllers/user.controller.js';
 
 const router = express.Router();
@@ -37,6 +38,7 @@ const updateValidation = [
 // router.post('/login', validate(loginValidation), loginUser);
 
 // Protected routes (authentication required)
+router.post('/register', registerUser);
 router.get('/', getAllUsers);
 router.get('/:userID', getUserById);
 router.put('/:userID', updateUser);

@@ -124,8 +124,7 @@ export const updateUser = async (req, res, next) => {
     if (!mongoose.Types.ObjectId.isValid(userID)) {
       return res.status(400).json({ success: false, message: 'Invalid user ID' });
     }
-    
-    // Find user
+
     const user = await User.findById(userID);
     if (!user) {
       return res.status(404).json({ success: false, message: 'User not found' });
