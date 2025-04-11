@@ -1,5 +1,7 @@
 import { Movie } from '../models/movie.js';
-
+import { Schedule } from '../models/schedule.js';
+import { Room } from '../models/room.js';
+import { Cinema } from '../models/cinema.js';
 export const getAllMovies = async (req, res, next) => {
   try {
     const movies = await Movie.find();
@@ -77,17 +79,6 @@ export const getPopularMovies = async (req, res, next) => {
   }
 };
 
-export const getMoviesWithSchedules = async (req, res, next) => {
-  try {
-    const movies = await Movie.find().populate({
-      path: 'schedules',
-      select: 'startTime endTime roomID',
-    });
-    res.status(200).json({ success: true, data: movies });
-  } catch (error) {
-    next(error);
-  }
-};
 //để tăng view cho movie (kb có cách khác k)
 export const incrementMovieViews = async (req, res, next) => {
   try {
@@ -105,7 +96,26 @@ export const incrementMovieViews = async (req, res, next) => {
     next(error);
   }
 };
+// get all cinemas that are showing a specific movie
+export const getCinemasByMovie = async (req, res, next) => {
+  try {
+    const { movieID } = req.query;
 
+    if (!movieID) {
+      return res.status(400).json({ success: false, message: 'Movie ID is required' });
+    }
+
+    const roomIDs = await Schedule.distinct('roomID', { movieID });
+
+    const cinemas = await Room.find({ _id: { $in: roomIDs } }).distinct('cinemaID');
+
+    const cinemaDetails = await Cinema.find({ _id: { $in: cinemas } });
+
+    res.status(200).json({ success: true, data: cinemaDetails });
+  } catch (error) {
+    next(error);
+  }
+};
 export const searchMovies = async (req, res, next) => {
   try {
     const { query } = req.query;

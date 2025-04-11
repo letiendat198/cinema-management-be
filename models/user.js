@@ -1,5 +1,6 @@
 import mongoose,{Schema,model} from "mongoose";
 import bcrypt from "bcrypt";
+import e from "express";
 
 const userSchema = new Schema({
     username: {
@@ -25,7 +26,18 @@ const userSchema = new Schema({
      watchHistory:[{
         movie:{type:mongoose.Schema.Types.ObjectId, ref:"Movie",required:true},
         date:{type:Date,default:Date.now}
-     }]
+     }],
+     email:{
+        type:String,
+        required:[true,"Email is required"],
+        unique:true,
+        validate:{
+            validator:(v)=>{
+                return /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(v)
+            },
+            message:"Check ur email format"
+        }
+     }
 })
 userSchema.pre("save", async function(next){
     if(!this.isModified("password")){

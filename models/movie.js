@@ -21,6 +21,12 @@ const movieSchema = new Schema({
   length: Number,
   director: String,
   moviestars: [String],
-  
+  releaseDate: Date,
+  ageRating: {
+    type: String,
+    enum: ['P', 'K', 'T13','T16', 'T18'],
+    default: 'P'
+  },
+  trailer: String
 })
 export const Movie = mongoose.model.Movie || model('Movie', movieSchema)
