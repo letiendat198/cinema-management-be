@@ -2,6 +2,7 @@ import express from 'express'
 import mongoose from 'mongoose'
 import dotenv from 'dotenv'
 import cookieParser from 'cookie-parser'
+import cors from 'cors'
 // import "./cron/jobs.js";
 import { errorHandler } from "./middleware/errorHandler.js";
 import { logger } from "./middleware/logger.js";
@@ -18,7 +19,7 @@ const mongoURI = process.env.MONGO_URI || 'mongodb://localhost:27017/cinemaDB'
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 app.use(cookieParser())
-
+app.use(cors())
 
 app.use(logger);
 
