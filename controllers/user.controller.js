@@ -14,16 +14,17 @@ export const getAllUsers = async (req, res, next) => {
 
 export const registerUser = async (req, res, next) => {
   try {
-    const { username, password, role } = req.body;
-    const existingUser = await User.findOne({ username });
+    const { username, email, password, role } = req.body;
+    const existingUser = await User.findOne({ username }) || await User.findOne({ email });
     if (existingUser) {
       return res.status(400).json({ 
         success: false, 
-        message: 'Username already exists' 
+        message: 'Username or email already exists' 
       });
     }
     const user = new User({
       username,
+      email,
       password, 
       role: role || 'user'
     });
@@ -119,7 +120,7 @@ export const getUserById = async (req, res, next) => {
 export const updateUser = async (req, res, next) => {
   try {
     const { userID } = req.params;
-    const { username, role } = req.body;
+    const { username, email, role, password } = req.body;
     
     if (!mongoose.Types.ObjectId.isValid(userID)) {
       return res.status(400).json({ success: false, message: 'Invalid user ID' });
@@ -132,10 +133,8 @@ export const updateUser = async (req, res, next) => {
     
     if (username) user.username = username;
     if (role) user.role = role;
-    
-    if (req.body.password) {
-      user.password = req.body.password; 
-    }
+    if (email) user.email = email;
+    if (password) user.password = password;
     
     await user.save();
     
