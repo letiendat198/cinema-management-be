@@ -15,7 +15,7 @@ export const addSchedule = async (req, res, next) => {
     const { movieID, roomID, startTime, endTime } = req.body;
     const newSchedule = new Schedule({ movieID, roomID, startTime, endTime });
     await newSchedule.save();
-    res.status(201).json({ success: true, data: newSchedule });
+    res.status(201).json({ success: true, data: newSchedule, message: "New schedule added successfully" });
   } catch (error) {
     next(error);
   }
@@ -32,7 +32,7 @@ export const updateSchedule = async (req, res, next) => {
     if (!updatedSchedule) {
       return res.status(404).json({ success: false, message: "Schedule not found" });
     }
-    res.status(200).json({ success: true, data: updatedSchedule });
+    res.status(200).json({ success: true, data: updatedSchedule, message: "Schedule updated successfully" });
   } catch (error) {
     next(error);
   }
