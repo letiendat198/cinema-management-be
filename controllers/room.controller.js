@@ -1,12 +1,14 @@
 import { Room } from "../models/room.js";
+import { Cinema } from "../models/cinema.js"
+import mongoose from "mongoose";
 //only get rooms by cinema
 export const getRooms = async (req, res) => {
     try {
-        const { cinemaID } = req.query;
-        if(!cinemaID){
+        const { cinemaId } = req.params;
+        if(!cinemaId){
             return res.status(400).json({message:"cinemaID is required"});
         }
-        const rooms = await Room.find({cinemaID}).populate("cinemaID");
+        const rooms = await Room.find({cinemaId}).populate("cinemaID");
         res.status(200).json(rooms);
     }
     catch (error){
@@ -16,8 +18,8 @@ export const getRooms = async (req, res) => {
 
 export const addRoom = async (req, res) => {
     try {
-        const { cinemaID, roomNumber } = req.body;
-        const newRoom = new Room({ cinemaID, roomNumber });
+        const { cinemaId, roomNumber, maxRow, maxColumn } = req.body;
+        const newRoom = new Room({ cinemaId, roomNumber, maxRow, maxColumn });
         await newRoom.save();
         res.status(201).json(newRoom);
     } catch (error) {

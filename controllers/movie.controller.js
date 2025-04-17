@@ -5,7 +5,7 @@ import { Cinema } from '../models/cinema.js';
 export const getAllMovies = async (req, res, next) => {
   try {
     const movies = await Movie.find();
-    res.status(200).json({ success: true, data: movies });
+    res.status(200).json({ success: true, data: movies, message: 'New movie added successfully' });
   } catch (error) {
     next(error);
   }
