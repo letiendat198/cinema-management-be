@@ -3,7 +3,7 @@ import { getRooms, addRoom, updateRoom, deleteRoom } from "../controllers/room.c
 
 const router = express.Router();
 
-router.get("/", getRooms);
+router.get("/:cinemaID", getRooms);
 router.post("/", addRoom);
 router.put("/:id", updateRoom);
 router.delete("/:id", deleteRoom);

@@ -1,10 +1,17 @@
+import { populate } from "dotenv";
 import { Schedule } from "../models/schedule.js";
 import ErrorHandler from "../utils/errorHandler.js";
 
 export const getSchedulesByMovieID = async (req, res, next) => {
   try {
     const { movieID } = req.params;
-    const schedules = await Schedule.find({ movieID }).populate("roomID");
+    const schedules = await Schedule.find({ movieID }).populate({
+      path: 'roomID',
+      populate: {
+        path: 'cinemaID',
+        model: 'Cinema'
+      }
+    });
     res.status(200).json({ success: true, data: schedules });
   } catch (error) {
     next(error);
@@ -21,7 +28,7 @@ export const addSchedule = async (req, res, next) => {
     
     const newSchedule = new Schedule({ movieID, roomID, startTime, endTime });
     await newSchedule.save();
-    res.status(201).json({ success: true, data: newSchedule });
+    res.status(201).json({ success: true, data: newSchedule, message: "New schedule added successfully" });
   } catch (error) {
     next(error);
   }
@@ -38,7 +45,7 @@ export const updateSchedule = async (req, res, next) => {
     if (!updatedSchedule) {
       return next(new ErrorHandler("Schedule not found", 404));
     }
-    res.status(200).json({ success: true, data: updatedSchedule });
+    res.status(200).json({ success: true, data: updatedSchedule, message: "Schedule updated successfully" });
   } catch (error) {
     next(error);
   }
