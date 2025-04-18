@@ -2,6 +2,8 @@ import { Cinema } from '../models/cinema.js';
 import { Movie } from '../models/movie.js';
 import { Schedule } from '../models/schedule.js';
 import { Room } from '../models/room.js';
+import ErrorHandler from "../utils/errorHandler.js";
+
 export const getAllCinemas = async (req, res, next) => {
   try {
     const cinemas = await Cinema.find();
@@ -16,7 +18,7 @@ export const getCinemaById = async (req, res, next) => {
     const { cinemaID } = req.params;
     const cinema = await Cinema.findById(cinemaID);
     if (!cinema) {
-      return res.status(404).json({ success: false, message: 'Cinema not found' });
+      return next(new ErrorHandler('Cinema not found', 404));
     }
     res.status(200).json({ success: true, data: cinema });
   } catch (error) {
@@ -39,7 +41,7 @@ export const updateCinema = async (req, res, next) => {
     const { cinemaID } = req.params;
     const cinema = await Cinema.findByIdAndUpdate(cinemaID, req.body, { new: true, runValidators: true });
     if (!cinema) {
-      return res.status(404).json({ success: false, message: 'Cinema not found' });
+      return next(new ErrorHandler('Cinema not found', 404));
     }
     res.status(200).json({ success: true, data: cinema });
   } catch (error) {
@@ -52,7 +54,7 @@ export const deleteCinema = async (req, res, next) => {
     const { cinemaID } = req.params;
     const cinema = await Cinema.findByIdAndDelete(cinemaID);
     if (!cinema) {
-      return res.status(404).json({ success: false, message: 'Cinema not found' });
+      return next(new ErrorHandler('Cinema not found', 404));
     }
     res.status(200).json({ success: true, message: 'Cinema deleted successfully' });
   } catch (error) {
@@ -65,13 +67,11 @@ export const getMoviebyCinema = async (req, res, next) => {
     const { cinemaID } = req.query;
 
     if (!cinemaID) {
-      return res.status(400).json({ success: false, message: 'Cinema ID is required' });
+      return next(new ErrorHandler('Cinema ID is required', 400));
     }
 
     const rooms = await Room.find({ cinemaID }).select('_id');
-
     const movieIDs = await Schedule.distinct('movieID', { roomID: { $in: rooms.map(room => room._id) } });
-
     const movies = await Movie.find({ _id: { $in: movieIDs } });
 
     res.status(200).json({ success: true, data: movies });
