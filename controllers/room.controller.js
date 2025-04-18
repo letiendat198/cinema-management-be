@@ -4,11 +4,11 @@ import mongoose from "mongoose";
 //only get rooms by cinema
 export const getRooms = async (req, res) => {
     try {
-        const { cinemaId } = req.params; // Để ý ID với Id
-        if(!cinemaId){
-            return res.status(400).json({message:"cinemaId is required"});
+        const { cinemaID } = req.params; // Để ý ID với Id
+        if(!cinemaID){
+            return res.status(400).json({message:"cinemaID is required"});
         }
-        const rooms = await Room.find({cinemaId}).populate("cinemaId");
+        const rooms = await Room.find({cinemaID}).populate("cinemaID");
         res.status(200).json({success: true, data: rooms}); // Stick to 1 result format only!!!
     }
     catch (error){
@@ -18,8 +18,8 @@ export const getRooms = async (req, res) => {
 
 export const addRoom = async (req, res) => {
     try {
-        const { cinemaId, roomNumber, maxRow, maxColumn } = req.body;
-        const newRoom = new Room({ cinemaId, roomNumber, maxRow, maxColumn });
+        const { cinemaID, roomNumber, maxRow, maxColumn } = req.body;
+        const newRoom = new Room({ cinemaID, roomNumber, maxRow, maxColumn });
         await newRoom.save();
         res.status(201).json({data: newRoom, message: 'New room added successfully'});
     } catch (error) {

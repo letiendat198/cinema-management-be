@@ -1,9 +1,16 @@
+import { populate } from "dotenv";
 import { Schedule } from "../models/schedule.js";
 
 export const getSchedulesByMovieID = async (req, res, next) => {
   try {
     const { movieID } = req.params;
-    const schedules = await Schedule.find({ movieID }).populate("roomID");
+    const schedules = await Schedule.find({ movieID }).populate({
+      path: 'roomID',
+      populate: {
+        path: 'cinemaID',
+        model: 'Cinema'
+      }
+    });
     res.status(200).json({ success: true, data: schedules });
   } catch (error) {
     next(error);

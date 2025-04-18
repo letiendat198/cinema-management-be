@@ -1,9 +1,9 @@
 import mongoose from "mongoose";
 
 const roomSchema = new mongoose.Schema({
-    cinemaId: { // Để ý ID và Id
+    cinemaID: { // Để ý ID và Id
         type: mongoose.Schema.Types.ObjectId, 
-        required: [true, "CinemaId is required"],
+        required: [true, "CinemaID is required"],
         ref: "Cinema" 
     },
     roomNumber: {
