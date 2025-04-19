@@ -2,6 +2,8 @@ import { Movie } from '../models/movie.js';
 import { Schedule } from '../models/schedule.js';
 import { Room } from '../models/room.js';
 import { Cinema } from '../models/cinema.js';
+import ErrorHandler from "../utils/errorHandler.js";
+
 export const getAllMovies = async (req, res, next) => {
   try {
     const movies = await Movie.find();
@@ -16,7 +18,7 @@ export const getMovieById = async (req, res, next) => {
     const { movieID } = req.params;
     const movie = await Movie.findById(movieID);
     if (!movie) {
-      return res.status(404).json({ success: false, message: 'Movie not found' });
+      return next(new ErrorHandler('Movie not found', 404));
     }
     res.status(200).json({ success: true, data: movie });
   } catch (error) {
@@ -39,7 +41,7 @@ export const updateMovie = async (req, res, next) => {
     const { movieID } = req.params;
     const movie = await Movie.findByIdAndUpdate(movieID, req.body, { new: true, runValidators: true });
     if (!movie) {
-      return res.status(404).json({ success: false, message: 'Movie not found' });
+      return next(new ErrorHandler('Movie not found', 404));
     }
     res.status(200).json({ success: true, data: movie });
   } catch (error) {
@@ -52,7 +54,7 @@ export const deleteMovie = async (req, res, next) => {
     const { movieID } = req.params;
     const movie = await Movie.findByIdAndDelete(movieID);
     if (!movie) {
-      return res.status(404).json({ success: false, message: 'Movie not found' });
+      return next(new ErrorHandler('Movie not found', 404));
     }
     res.status(200).json({ success: true, message: 'Movie deleted successfully' });
   } catch (error) {
@@ -89,26 +91,25 @@ export const incrementMovieViews = async (req, res, next) => {
       { new: true }
     );
     if (!movie) {
-      return res.status(404).json({ success: false, message: 'Movie not found' });
+      return next(new ErrorHandler('Movie not found', 404));
     }
     res.status(200).json({ success: true, data: movie });
   } catch (error) {
     next(error);
   }
 };
+
 // get all cinemas that are showing a specific movie
 export const getCinemasByMovie = async (req, res, next) => {
   try {
     const { movieID } = req.query;
 
     if (!movieID) {
-      return res.status(400).json({ success: false, message: 'Movie ID is required' });
+      return next(new ErrorHandler('Movie ID is required', 400));
     }
 
     const roomIDs = await Schedule.distinct('roomID', { movieID });
-
     const cinemas = await Room.find({ _id: { $in: roomIDs } }).distinct('cinemaID');
-
     const cinemaDetails = await Cinema.find({ _id: { $in: cinemas } });
 
     res.status(200).json({ success: true, data: cinemaDetails });
@@ -116,6 +117,7 @@ export const getCinemasByMovie = async (req, res, next) => {
     next(error);
   }
 };
+
 export const searchMovies = async (req, res, next) => {
   try {
     const { query } = req.query;

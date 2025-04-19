@@ -1,7 +1,7 @@
 import { User } from '../models/user.js';
-// import bcrypt from 'bcrypt';
-// import jwt from 'jsonwebtoken';
+import sendToken from '../utils/jwtToken.js';
 import mongoose from 'mongoose';
+import ErrorHandler from "../utils/errorHandler.js";
 
 export const getAllUsers = async (req, res, next) => {
   try {
@@ -15,13 +15,16 @@ export const getAllUsers = async (req, res, next) => {
 export const registerUser = async (req, res, next) => {
   try {
     const { username, email, password, role } = req.body;
+    
+    if (!username || !email || !password) {
+      return next(new ErrorHandler("Please provide all required fields", 400));
+    }
+    
     const existingUser = await User.findOne({ username }) || await User.findOne({ email });
     if (existingUser) {
-      return res.status(400).json({ 
-        success: false, 
-        message: 'Username or email already exists' 
-      });
+      return next(new ErrorHandler("Username or email already exists", 400));
     }
+    
     const user = new User({
       username,
       email,
@@ -30,73 +33,44 @@ export const registerUser = async (req, res, next) => {
     });
     
     await user.save();
-    
-    const userResponse = { ...user.toObject() };
-    delete userResponse.password;
-    
-    res.status(201).json({ 
-      success: true, 
-      message: 'User registered successfully',
-      data: userResponse
-    });
+    sendToken(user, 201, res);
   } catch (error) {
     next(error);
   }
 };
 
-// export const loginUser = async (req, res, next) => {
-//   try {
-//     const { username, password } = req.body;
+export const loginUser = async (req, res, next) => {
+  try {
+    const { username, password } = req.body;
     
-//     const user = await User.findOne({ username });
-//     if (!user) {
-//       return res.status(401).json({ 
-//         success: false, 
-//         message: 'Invalid username or password' 
-//       });
-//     }
+    if (!username || !password) {
+      return next(new ErrorHandler("Please provide username and password", 400));
+    }
     
-//     const isPasswordValid = await bcrypt.compare(password, user.password);
-//     if (!isPasswordValid) {
-//       return res.status(401).json({ 
-//         success: false, 
-//         message: 'Invalid username or password' 
-//       });
-//     }
+    const user = await User.findOne({ username }).select('+password');
     
-//     const token = jwt.sign(
-//       { id: user._id, username: user.username, role: user.role },
-//       process.env.JWT_SECRET,
-//       { expiresIn: '1d' }
-//     );
+    if (!user) {
+      return next(new ErrorHandler("Invalid credentials", 401));
+    }
     
-//     res.cookie('token', token, {
-//       httpOnly: true,
-//       secure: process.env.NODE_ENV === 'production',
-//       maxAge: 24 * 60 * 60 * 1000 // 1 day
-//     });
+    const isMatch = await user.comparePassword(password);
     
-//     res.status(200).json({
-//       success: true,
-//       message: 'Login successful',
-//       token,
-//       user: {
-//         id: user._id,
-//         username: user.username,
-//         role: user.role
-//       }
-//     });
-//   } catch (error) {
-//     next(error);
-//   }
-// };
+    if (!isMatch) {
+      return next(new ErrorHandler("Invalid credentials", 401));
+    }
+    
+    sendToken(user, 200, res);
+  } catch (error) {
+    next(error);
+  }
+}
 
 export const getUserById = async (req, res, next) => {
   try {
     const { userID } = req.params;
     
     if (!mongoose.Types.ObjectId.isValid(userID)) {
-      return res.status(400).json({ success: false, message: 'Invalid user ID' });
+      return next(new ErrorHandler("Invalid user ID", 400));
     }
     
     const user = await User.findById(userID)
@@ -108,7 +82,7 @@ export const getUserById = async (req, res, next) => {
       });
     
     if (!user) {
-      return res.status(404).json({ success: false, message: 'User not found' });
+      return next(new ErrorHandler("User not found", 404));
     }
     
     res.status(200).json({ success: true, data: user });
@@ -123,12 +97,12 @@ export const updateUser = async (req, res, next) => {
     const { username, email, role, password } = req.body;
     
     if (!mongoose.Types.ObjectId.isValid(userID)) {
-      return res.status(400).json({ success: false, message: 'Invalid user ID' });
+      return next(new ErrorHandler("Invalid user ID", 400));
     }
 
     const user = await User.findById(userID);
     if (!user) {
-      return res.status(404).json({ success: false, message: 'User not found' });
+      return next(new ErrorHandler("User not found", 404));
     }
     
     if (username) user.username = username;
@@ -155,13 +129,13 @@ export const deleteUser = async (req, res, next) => {
     const { userID } = req.params;
     
     if (!mongoose.Types.ObjectId.isValid(userID)) {
-      return res.status(400).json({ success: false, message: 'Invalid user ID' });
+      return next(new ErrorHandler("Invalid user ID", 400));
     }
     
     const user = await User.findByIdAndDelete(userID);
     
     if (!user) {
-      return res.status(404).json({ success: false, message: 'User not found' });
+      return next(new ErrorHandler("User not found", 404));
     }
     
     res.status(200).json({
@@ -178,17 +152,17 @@ export const getUserRank = async (req, res, next) => {
     const { userID } = req.params;
     
     if (!mongoose.Types.ObjectId.isValid(userID)) {
-      return res.status(400).json({ success: false, message: 'Invalid user ID' });
+      return next(new ErrorHandler("Invalid user ID", 400));
     }
     
     const user = await User.findById(userID).populate('userRank');
     
     if (!user) {
-      return res.status(404).json({ success: false, message: 'User not found' });
+      return next(new ErrorHandler("User not found", 404));
     }
     
     if (!user.userRank) {
-      return res.status(404).json({ success: false, message: 'User has no rank yet' });
+      return next(new ErrorHandler("User has no rank yet", 404));
     }
     
     res.status(200).json({ success: true, data: user.userRank });
@@ -202,13 +176,13 @@ export const getUserPoints = async (req, res, next) => {
     const { userID } = req.params;
     
     if (!mongoose.Types.ObjectId.isValid(userID)) {
-      return res.status(400).json({ success: false, message: 'Invalid user ID' });
+      return next(new ErrorHandler("Invalid user ID", 400));
     }
     
     const user = await User.findById(userID);
     
     if (!user) {
-      return res.status(404).json({ success: false, message: 'User not found' });
+      return next(new ErrorHandler("User not found", 404));
     }
     
     const points = user.watchHistory?.length || 0;

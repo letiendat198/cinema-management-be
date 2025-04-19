@@ -1,9 +1,10 @@
 import jwt from "jsonwebtoken";
+import ErrorHandler from "../utils/errorHandler.js";
 
 export const authenticate = (req, res, next) => {
     const token = req.cookies.token || req.headers.authorization?.split(" ")[1];
     if (!token) {
-        return res.status(401).json({ message: "Access denied. No token provided." });
+        return next(new ErrorHandler("Access denied. No token provided.", 401));
     }
 
     try {
@@ -11,13 +12,13 @@ export const authenticate = (req, res, next) => {
         req.user = decoded; 
         next();
     } catch (err) {
-        res.status(400).json({ message: "Invalid token." });
+        return next(new ErrorHandler("Invalid token.", 400));
     }
 };
 
 export const authorize = (roles = []) => (req, res, next) => {
     if (!roles.includes(req.user.role)) {
-        return res.status(403).json({ message: "Access denied. Insufficient permissions." });
+        return next(new ErrorHandler("Access denied. Insufficient permissions.", 403));
     }
     next();
-};  
+};
