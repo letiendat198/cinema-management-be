@@ -17,6 +17,20 @@ export const getRooms = async (req, res, next) => {
     }
 }
 
+export const getRoomById = async (req, res, next) => {
+    try {
+        const { roomID } = req.params; // Để ý ID với Id
+        if(!roomID){
+            return next(new ErrorHandler("roomID is required", 400));
+        }
+        const rooms = await Room.findById(roomID).populate("cinemaID");
+        res.status(200).json({success: true, data: rooms}); // Stick to 1 result format only!!!
+    }
+    catch (error){
+        next(error);
+    }
+}
+
 export const addRoom = async (req, res, next) => {
     try {
         const { cinemaID, roomNumber, maxRow, maxColumn } = req.body;
