@@ -5,7 +5,6 @@ import cookieParser from 'cookie-parser'
 import cors from 'cors'
 // import "./cron/jobs.js";
 import { errorHandler } from "./middleware/errorHandler.js";
-import { logger } from "./middleware/logger.js";
 
 // Import routes
 import userRoutes from './routes/user.routes.js';
@@ -25,8 +24,6 @@ app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 app.use(cookieParser())
 app.use(cors())
-
-app.use(logger);
 
 app.get("/", (req, res) => {
     res.send("Hello World")
