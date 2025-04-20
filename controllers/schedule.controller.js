@@ -1,6 +1,8 @@
 import { populate } from "dotenv";
 import { Schedule } from "../models/schedule.js";
+import { Ticket } from "../models/ticket.js"; 
 import ErrorHandler from "../utils/errorHandler.js";
+import mongoose from 'mongoose';
 
 export const getSchedulesByMovieID = async (req, res, next) => {
   try {
@@ -59,6 +61,28 @@ export const deleteSchedule = async (req, res, next) => {
       return next(new ErrorHandler("Schedule not found", 404));
     }
     res.status(200).json({ success: true, message: "Schedule deleted successfully" });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// Get booked seats for a specific schedule
+export const getBookedSeats = async (req, res, next) => {
+  try {
+    const { scheduleID } = req.params;
+
+    if (!mongoose.Types.ObjectId.isValid(scheduleID)) {
+        return next(new ErrorHandler("Invalid schedule ID", 400));
+    }
+
+    const bookedTickets = await Ticket.find({
+      showtime: scheduleID,
+      status: 'booked'
+    }).select('seatLabel -_id');
+
+    const bookedSeatLabels = bookedTickets.map(ticket => ticket.seatLabel);
+
+    res.status(200).json({ success: true, data: bookedSeatLabels });
   } catch (error) {
     next(error);
   }

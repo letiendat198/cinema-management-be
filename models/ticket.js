@@ -11,10 +11,14 @@ const ticketSchema = new Schema({
     ref: "Schedule",
     required: true 
   },
-  seat: {
-    type: Schema.Types.ObjectId, 
-    ref: "Seat",
+  seattype: {
+    type: Schema.Types.ObjectId,
+    ref: "SeatType",
     required: true
+  },
+  seatLabel: {
+    type: String,
+    required: [true, "Seat label is required"] 
   },
   user: {
     type: Schema.Types.ObjectId,
@@ -22,15 +26,14 @@ const ticketSchema = new Schema({
   },
   status: {
     type: String,
-    enum: ["reserved", "expired"],
-    default: "reserved"
+    enum: ["booked", "expired", "cancelled"], 
+    default: "booked" 
   },
   ticketCode: String,
   checkinDate: {
     type: Date,
     required: false
-  },
-  createdAt: { type: Date, default: Date.now }
+  }
 }, {
   timestamps: true
 });
@@ -53,7 +56,7 @@ ticketSchema.pre("save", async function(next) {
 ticketSchema.statics.expireTickets = async function () {
   const now = new Date();
   await this.updateMany(
-    { status: "reserved", checkinDate: { $lt: now } },
+    { status: "booked", checkinDate: { $lt: now } }, 
     { $set: { status: "expired" } }
   );
 };
