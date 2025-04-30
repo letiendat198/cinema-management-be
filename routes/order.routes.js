@@ -15,6 +15,7 @@ router.get('/', getAllOrders);
 // router.post('/', authenticate, createOrder); // Requires logged in
 router.post('/', createOrder); 
 router.get('/:orderID', getOrderById);
+router.get('/by-user/:userID', getOrdersByUserId);
 router.post('/:orderID/confirm', confirmOrder);
 
 

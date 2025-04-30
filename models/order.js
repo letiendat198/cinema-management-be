@@ -31,10 +31,9 @@ const orderSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: "Schedule",
     },
-    _tempSeats: [{ // temporarily for pending order 
-        seatLabel: { type: String, required: true },
-        seattype: { type: mongoose.Schema.Types.ObjectId, ref: 'SeatType', required: true }
-    }]
+    _tempSeats: { 
+        type: [Number], 
+        required: true }
 }, { timestamps: true });
 
 export const Order = mongoose.model.Order || mongoose.model("Order", orderSchema);

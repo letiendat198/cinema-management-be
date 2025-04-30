@@ -11,14 +11,9 @@ const ticketSchema = new Schema({
     ref: "Schedule",
     required: true 
   },
-  seattype: {
-    type: Schema.Types.ObjectId,
-    ref: "SeatType",
-    required: true
-  },
-  seatLabel: {
-    type: String,
-    required: [true, "Seat label is required"] 
+  seatIndex: {
+    type: Number,
+    required: [true, "Seat index is required"] 
   },
   user: {
     type: Schema.Types.ObjectId,

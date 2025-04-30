@@ -3,16 +3,17 @@ import { Ticket } from '../models/ticket.js';
 import { SeatType } from '../models/seattype.js';
 import { ComplementItem } from '../models/complementitem.js';
 import { Schedule } from '../models/schedule.js'; 
+import { getRoomSeatLabelByIndex, SeatMap } from '../models/seatmap.js';
 import ErrorHandler from '../utils/errorHandler.js';
 import mongoose from 'mongoose';
 // Dont have discount
-const calculateTotalPrice = async (seats, complementItemsData) => {
+const calculateTotalPrice = async (seatsIndex, complementItemsData, seatMapData) => {
     let totalPrice = 0;
 
     // Calculate seat price
-    for (const seat of seats) {
-        const seatType = await SeatType.findById(seat.seattype);
-        if (!seatType) throw new Error(`SeatType not found for ID: ${seat.seattype}`);
+    for (const index of seatsIndex) {
+        const seatType = await SeatType.findOne({value: seatMapData[index]});
+        if (!seatType) throw new Error(`SeatType value ${seatMapData[index]} not found!`);
         totalPrice += seatType.price;
     }
 
@@ -30,14 +31,14 @@ const calculateTotalPrice = async (seats, complementItemsData) => {
 
 // Pending order
 export const createOrder = async (req, res, next) => {
-    try {
-        const { userID, showtimeID, seats, complementItems: complementItemsData } = req.body; // seats = [{ seatLabel: 'A1', seattype: 'VIP' }, ...]
+    try { // WARNING: Using seat label as ticket data may cause a problem if seat label is modified
+        const { userID, showtime, seatsIndex, complementItems: complementItemsData } = req.body; // seatsIndex = [0,1,2,...], ...]
 
-        if (!showtimeID || !seats || seats.length === 0) {
+        if (!showtime || !seatsIndex || seatsIndex.length === 0) {
             return next(new ErrorHandler("Showtime and at least one seat are required", 400));
         }
 
-        if (!mongoose.Types.ObjectId.isValid(showtimeID)) {
+        if (!mongoose.Types.ObjectId.isValid(showtime)) {
              return next(new ErrorHandler("Invalid showtime ID", 400));
         }
          if (userID && !mongoose.Types.ObjectId.isValid(userID)) {
@@ -45,14 +46,15 @@ export const createOrder = async (req, res, next) => {
         }
 
       // Check for booked seat to ensure no error is in confirmOrder, shouldve been here
-
-        const totalPrice = await calculateTotalPrice(seats, complementItemsData);
+        const schedule = await Schedule.findById(showtime);
+        const seatMapData = await SeatMap.findOne({roomID: schedule.roomID});
+        const totalPrice = await calculateTotalPrice(seatsIndex, complementItemsData, seatMapData.valueMap);
 
         const orderData = {
             userID: userID,
             // We don't link tickets yet, only store seat info temporarily for confirmation
-            _tempSeats: seats, // Temp for ticket
-            showtime: showtimeID, // Temp for ticket
+            _tempSeats: seatsIndex, // Temp for ticket
+            showtime: showtime, // Temp for ticket
             complementItems: complementItemsData || [],
             totalPrice,
             status: 'pending'
@@ -96,12 +98,12 @@ export const confirmOrder = async (req, res, next) => {
         // Check if seats are still available
         const existingTickets = await Ticket.find({
             showtime: showtimeID,
-            seatLabel: { $in: seatsToBook.map(s => s.seatLabel) },
+            seatIndex: { $in: seatsToBook.map(s => s.seatIndex) },
             status: { $in: ['booked'] } 
         });
 
         if (existingTickets.length > 0) {
-            const bookedLabels = existingTickets.map(t => t.seatLabel);
+            const bookedLabels = existingTickets.map(t => t.seatIndex);
             return next(new ErrorHandler(`Seats are no longer available: ${bookedLabels.join(', ')}`, 409)); // 409 Conflict
         }
 
@@ -115,8 +117,7 @@ export const confirmOrder = async (req, res, next) => {
             const ticket = new Ticket({
                 order: order._id,
                 showtime: showtimeID,
-                seattype: seat.seattype,
-                seatLabel: seat.seatLabel,
+                seatIndex: seat.seatIndex,
                 user: order.userID,
                 status: 'booked',
                 checkinDate: schedule.startTime 
@@ -160,7 +161,6 @@ export const getAllOrders = async (req, res, next) => {
                 path: 'tickets',
                 populate: [
                     { path: 'showtime', populate: { path: 'movieID roomID' } }, 
-                    { path: 'seattype' }
                 ]
             })
             .populate({
@@ -189,7 +189,6 @@ export const getOrderById = async (req, res, next) => {
             path: 'tickets',
             populate: [
                  { path: 'showtime', populate: { path: 'movieID roomID', populate: { path: 'cinemaID movieID' } } },
-                 { path: 'seattype' }
             ]
         })
         .populate({
@@ -217,24 +216,44 @@ export const getOrdersByUserId = async (req, res, next) => {
         }
 
         const orders = await Order.find({ userID: userID })
-            .populate('userID', 'username email')
-             .populate({
-                path: 'tickets',
-                populate: [
-                    { path: 'showtime', populate: { path: 'movieID roomID', populate: { path: 'cinemaID movieID' } } },
-                    { path: 'seattype' }
-                ]
+            // .populate('userID', 'username email')
+             .populate({ 
+                path: 'showtime', 
+                populate: [{ 
+                    path: 'roomID', 
+                    model: 'Room',
+                    populate: { 
+                        path: 'cinemaID',
+                        model: 'Cinema' 
+                    }
+                },
+                {
+                    path: 'movieID',
+                    model: 'Movie'
+                }]
             })
             .populate({
                 path: 'complementItems.item',
                 model: 'ComplementItem'
             })
-            .sort({ createdAt: -1 });
+            .sort({ createdAt: -1 }).lean(); // Lean to get rid of Mongoose 
 
         if (!orders || orders.length === 0) {
              res.status(200).json({ success: true, count: 0, data: [] });
              return;
         }
+
+        for(let i=0;i<orders.length;i++) {
+            let seats = orders[i]._tempSeats;
+            let seatsLbl = Array(seats.length);
+            let roomID = orders[i].showtime.roomID._id;
+            for (let j=0;j<seats.length;j++) {
+                seatsLbl[j] = await getRoomSeatLabelByIndex(roomID, seats[j]);
+            };
+            console.log(seatsLbl)
+            orders[i].seatsLabel = seatsLbl;
+        }
+        console.log(orders)
 
         res.status(200).json({ success: true, count: orders.length, data: orders });
     } catch (error) {

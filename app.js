@@ -11,7 +11,7 @@ import movieRoutes from './routes/movie.routes.js';
 import cinemaRoutes from './routes/cinema.routes.js';
 import roomRoutes from './routes/room.routes.js';
 import scheduleRoutes from './routes/schedule.routes.js';
-import seatRoutes from './routes/seat.routes.js';
+import seatRoutes from './routes/seatmap.routes.js';
 import seatTypeRoutes from './routes/seattype.routes.js';
 import complementItemRoutes from './routes/complementitem.routes.js'; 
 import orderRoutes from './routes/order.routes.js';
@@ -37,11 +37,11 @@ app.use('/movie', movieRoutes);
 app.use('/cinema', cinemaRoutes);
 app.use('/room', roomRoutes);
 app.use('/schedule', scheduleRoutes);
-app.use('/seat', seatRoutes);
+app.use('/seatmap', seatRoutes);
 app.use('/seattype', seatTypeRoutes);
-app.use('/complement-items', complementItemRoutes);
-app.use('/orders', orderRoutes);
-app.use('/tickets', ticketRoutes); 
+app.use('/complement-item', complementItemRoutes);
+app.use('/order', orderRoutes);
+app.use('/ticket', ticketRoutes); 
 app.use(errorHandler);
 
 mongoose.connect(mongoURI,{})
