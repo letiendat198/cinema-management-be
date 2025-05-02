@@ -7,9 +7,10 @@ import {
   deleteMovie,
   getMoviesByGenre,
   getPopularMovies,
-  incrementMovieViews,
+  incrementMovieLikes,
   searchMovies,
-  getCinemasByMovie
+  getCinemasByMovie,
+  getRecommendedMovies
 } from '../controllers/movie.controller.js';
 
 import { getSchedulesByMovieID } from '../controllers/schedule.controller.js';
@@ -19,10 +20,11 @@ router.get('/', getAllMovies);
 router.get('/search', searchMovies);
 router.get('/popular', getPopularMovies);
 router.get('/genre', getMoviesByGenre);
+router.get('/recommendations/:userID', getRecommendedMovies); // Add new route for recommendations
 router.get('/:movieID', getMovieById);
 // Get cinemas by movie ID
 router.get('/:movieID/cinemas',getCinemasByMovie)
-router.put('/:movieID/views', incrementMovieViews);
+router.put('/:movieID/likes', incrementMovieLikes);
 // Available schedules for a movie
 router.get('/:movieID/schedules', getSchedulesByMovieID);
 //admin

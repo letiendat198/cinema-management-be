@@ -2,6 +2,7 @@ import { Movie } from '../models/movie.js';
 import { Schedule } from '../models/schedule.js';
 import { Room } from '../models/room.js';
 import { Cinema } from '../models/cinema.js';
+import { User } from '../models/user.js';
 import ErrorHandler from "../utils/errorHandler.js";
 
 export const getAllMovies = async (req, res, next) => {
@@ -16,7 +17,12 @@ export const getAllMovies = async (req, res, next) => {
 export const getMovieById = async (req, res, next) => {
   try {
     const { movieID } = req.params;
-    const movie = await Movie.findById(movieID);
+    const movie = await Movie.findByIdAndUpdate(
+      movieID,
+      { $inc: { view: 1 } },
+      { new: true }
+    );
+    
     if (!movie) {
       return next(new ErrorHandler('Movie not found', 404));
     }
@@ -81,13 +87,67 @@ export const getPopularMovies = async (req, res, next) => {
   }
 };
 
-//để tăng view cho movie (kb có cách khác k)
-export const incrementMovieViews = async (req, res, next) => {
+export const getRecommendedMovies = async (req, res, next) => {
+  try {
+    const { userID } = req.params;
+    
+    if (!userID) {
+      return next(new ErrorHandler('User ID is required', 400));
+    }
+
+    const user = await User.findById(userID).populate('watchHistory.movie');
+    
+    if (!user) {
+      return next(new ErrorHandler('User not found', 404));
+    }
+
+    // If user has no watch history, return popular movies instead
+    if (!user.watchHistory || user.watchHistory.length === 0) {
+      const popularMovies = await Movie.find().sort({ view: -1, like: -1 }).limit(10);
+      return res.status(200).json({ 
+        success: true, 
+        data: popularMovies,
+        message: 'Showing popular movies instead.'
+      });
+    }
+
+    // Extract genres from user's watch history
+    const userGenres = {};
+    user.watchHistory.forEach(history => {
+      if (history.movie && history.movie.genre) {
+        if (userGenres[history.movie.genre]) {
+          userGenres[history.movie.genre]++;
+        } else {
+          userGenres[history.movie.genre] = 1;
+        }
+      }
+    });
+
+    const sortedGenres = Object.keys(userGenres).sort((a, b) => userGenres[b] - userGenres[a]);
+    
+    const watchedMovieIds = user.watchHistory.map(history => history.movie._id.toString());
+    
+    const recommendedMovies = await Movie.find({
+      genre: { $in: sortedGenres.slice(0, 3) }, 
+      _id: { $nin: watchedMovieIds }
+    }).limit(10);
+
+    res.status(200).json({ 
+      success: true, 
+      data: recommendedMovies,
+      preferredGenres: sortedGenres.slice(0, 3)
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const incrementMovieLikes = async (req, res, next) => {
   try {
     const { movieID } = req.params;
     const movie = await Movie.findByIdAndUpdate(
       movieID,
-      { $inc: { view: 1 } },
+      { $inc: { like: 1 } },
       { new: true }
     );
     if (!movie) {

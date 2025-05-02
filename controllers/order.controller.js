@@ -2,10 +2,11 @@ import { Order } from '../models/order.js';
 import { Ticket } from '../models/ticket.js';
 import { SeatType } from '../models/seattype.js';
 import { ComplementItem } from '../models/complementitem.js';
+import { User } from '../models/user.js';
 import { Schedule } from '../models/schedule.js'; 
 import { getRoomSeatLabelByIndex, SeatMap } from '../models/seatmap.js';
 import ErrorHandler from '../utils/errorHandler.js';
-import mongoose from 'mongoose';
+import mongoose, { model } from 'mongoose';
 // Dont have discount
 const calculateTotalPrice = async (seatsIndex, complementItemsData, seatMapData) => {
     let totalPrice = 0;
@@ -98,7 +99,7 @@ export const confirmOrder = async (req, res, next) => {
         // Check if seats are still available
         const existingTickets = await Ticket.find({
             showtime: showtimeID,
-            seatIndex: { $in: seatsToBook.map(s => s.seatIndex) },
+            seatIndex: { $in: seatsToBook },
             status: { $in: ['booked'] } 
         });
 
@@ -113,11 +114,11 @@ export const confirmOrder = async (req, res, next) => {
         if (!schedule) return next(new ErrorHandler("Showtime schedule not found", 404));
 
 
-        for (const seat of seatsToBook) {
+        for (const seatIndex of seatsToBook) {
             const ticket = new Ticket({
                 order: order._id,
                 showtime: showtimeID,
-                seatIndex: seat.seatIndex,
+                seatIndex: seatIndex,
                 user: order.userID,
                 status: 'booked',
                 checkinDate: schedule.startTime 
@@ -132,12 +133,29 @@ export const confirmOrder = async (req, res, next) => {
         order._tempSeats = undefined; // Remove temp data
         order.showtime = undefined; // Redundant data
         await order.save();
+        
+        // Add movie to user's watch history 
+        if (order.userID) {
+            const movieID = schedule.movieID;
+            await User.findByIdAndUpdate(
+                order.userID,
+                {
+                    $push: { 
+                        watchHistory: { 
+                            movie: movieID,
+                            date: new Date() 
+                        }
+                    }
+                }
+            );
+        }
+        
         // populate data for the respond order
         const confirmedOrder = await Order.findById(order._id)
             .populate('userID', 'username email')
             .populate({
                 path: 'tickets',
-                populate: { path: 'seattype' }
+                model: 'Ticket'
             })
             .populate({
                 path: 'complementItems.item',
