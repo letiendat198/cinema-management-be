@@ -28,6 +28,10 @@ const ticketSchema = new Schema({
   checkinDate: {
     type: Date,
     required: false
+  },
+  notificationSent: { 
+    type: Boolean,
+    default: false
   }
 }, {
   timestamps: true
