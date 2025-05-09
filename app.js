@@ -16,6 +16,7 @@ import seatTypeRoutes from './routes/seattype.routes.js';
 import complementItemRoutes from './routes/complementitem.routes.js'; 
 import orderRoutes from './routes/order.routes.js';
 import ticketRoutes from './routes/ticket.routes.js';
+import paymentRoutes from './routes/payment.routes.js';
 
 dotenv.config()
 
@@ -42,6 +43,8 @@ app.use('/seattype', seatTypeRoutes);
 app.use('/complement-item', complementItemRoutes);
 app.use('/order', orderRoutes);
 app.use('/ticket', ticketRoutes); 
+app.use('/pay', paymentRoutes);
+app.use('/IPN', paymentRoutes);
 app.use(errorHandler);
 
 mongoose.connect(mongoURI,{})
