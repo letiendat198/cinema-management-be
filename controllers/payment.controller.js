@@ -55,7 +55,7 @@ export const getPayUrlForOrder = async (req, res, next) => {
   }
 };
 
-export const vnPayIPNHanle = async (req, res, next) => {
+export const vnPayIPNHandle = async (req, res, next) => {
     const {vnp_TmnCode, vnp_ResponseCode, vnp_TransactionStatus, vnp_SecureHash} = req.query;
 
     res.status(200).json({
