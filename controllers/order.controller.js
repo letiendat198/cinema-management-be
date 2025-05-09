@@ -130,7 +130,7 @@ export const confirmOrder = async (req, res, next) => {
         //Update Order
         order.tickets = createdTickets;
         order.status = 'completed';
-        order._tempSeats = undefined; // Remove temp data
+        order._tempSeats = []; // Remove temp data
         order.showtime = undefined; // Redundant data
         await order.save();
         

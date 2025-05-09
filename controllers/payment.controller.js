@@ -2,6 +2,7 @@ import mongoose from 'mongoose';
 import { Order } from '../models/order.js'
 import { Ticket } from '../models/ticket.js';
 import { Schedule } from '../models/schedule.js'; 
+import { User } from '../models/user.js';
 import ErrorHandler from "../utils/errorHandler.js";
 import dayjs from 'dayjs'
 import crypto from 'crypto'
@@ -86,9 +87,6 @@ export const vnPayIPNHandle = async (req, res, next) => {
             throw new Error(`Order status is already ${order.status}`);
         }
 
-        // payment verification logic here if possible
-
-
         const showtimeID = order.showtime; 
         const seatsToBook = order._tempSeats; 
 
@@ -109,7 +107,6 @@ export const vnPayIPNHandle = async (req, res, next) => {
         const schedule = await Schedule.findById(showtimeID); // For checkinDate
         if (!schedule) throw new Error("Showtime schedule not found");
 
-
         for (const seatIndex of seatsToBook) {
             const ticket = new Ticket({
                 order: order._id,
@@ -126,8 +123,8 @@ export const vnPayIPNHandle = async (req, res, next) => {
         //Update Order
         order.tickets = createdTickets;
         order.status = 'completed';
-        order._tempSeats = undefined; // Remove temp data
-        order.showtime = undefined; // Redundant data
+        order._tempSeats = []; // Remove temp data - but temp data is still required
+        // order.showtime = undefined; // Redundant data
         await order.save();
         
         // Add movie to user's watch history 
@@ -152,6 +149,7 @@ export const vnPayIPNHandle = async (req, res, next) => {
         })
 
     } catch (error) {
+        console.log(error);
         res.status(200).json({
             RspCode: '02',
             Message: error
