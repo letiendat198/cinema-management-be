@@ -1,5 +1,6 @@
 import cron from "node-cron";
 import { Ticket } from "../models/ticket.js";
+import { scheduleReminderNotifications } from "./notificationJob.js"; // Thêm import
 
 // Refresh status ticket
 cron.schedule("* * * * *", async () => {
@@ -10,3 +11,5 @@ cron.schedule("* * * * *", async () => {
     console.error("Error updating expired tickets:", error);
   }
 });
+
+scheduleReminderNotifications(); 
