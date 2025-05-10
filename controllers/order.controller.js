@@ -268,10 +268,8 @@ export const getOrdersByUserId = async (req, res, next) => {
             for (let j=0;j<seats.length;j++) {
                 seatsLbl[j] = await getRoomSeatLabelByIndex(roomID, seats[j]);
             };
-            console.log(seatsLbl)
             orders[i].seatsLabel = seatsLbl;
         }
-        console.log(orders)
 
         res.status(200).json({ success: true, count: orders.length, data: orders });
     } catch (error) {

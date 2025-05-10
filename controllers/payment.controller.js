@@ -66,7 +66,7 @@ export const vnPayIPNHandle = async (req, res, next) => {
     if (vnp_TransactionStatus != '00') {
         return res.status(200).json({
                 RspCode: '02',
-                Message: error,
+                Message: 'Transaction failed on VNPay side',
             })
     }
 

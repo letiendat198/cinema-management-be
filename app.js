@@ -17,7 +17,6 @@ import complementItemRoutes from './routes/complementitem.routes.js';
 import orderRoutes from './routes/order.routes.js';
 import ticketRoutes from './routes/ticket.routes.js';
 import paymentRoutes from './routes/payment.routes.js';
-import { vnPayIPNHandle } from './controllers/payment.controller.js'
 
 dotenv.config()
 
@@ -45,8 +44,6 @@ app.use('/complement-item', complementItemRoutes);
 app.use('/order', orderRoutes);
 app.use('/ticket', ticketRoutes); 
 app.use('/pay', paymentRoutes);
-
-app.get('/IPN', vnPayIPNHandle)
 app.use(errorHandler);
 
 mongoose.connect(mongoURI,{})
