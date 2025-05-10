@@ -2,13 +2,22 @@ import { Ticket } from "../models/ticket.js"; // Correct import if model file is
 import ErrorHandler from "../utils/errorHandler.js"; // Assuming you have this
 import mongoose from 'mongoose';
 import { Schedule } from "../models/schedule.js";
+import { getRoomSeatLabelByIndex } from "../models/seatmap.js";
 export const getAllTickets = async (req, res, next) => {
     try {
         const tickets = await Ticket.find()
             .populate({ path: 'order', select: 'userID status' }) 
             .populate({ path: 'showtime', populate: { path: 'movieID roomID' } })
             .populate('seattype') 
-            .populate('user', 'username email');
+            .populate('user', 'username email').lean();
+
+
+        // Inject seat labels
+        for(let i=0;i<tickets.length;i++) {
+            let roomID = tickets[i].showtime.roomID._id;
+            tickets[i].seatLabel = await getRoomSeatLabelByIndex(roomID, tickets[i].seatIndex);
+        }
+
         res.status(200).json({ success: true, count: tickets.length, data: tickets });
     } catch (error) {
         next(error);
@@ -28,12 +37,17 @@ export const getTicketsByUserId = async (req, res, next) => {
                 path: "showtime", 
                 populate: [ 
                     { path: 'movieID', select: 'title img' }, 
-                    { path: 'roomID', select: 'roomNumber cinemaID', populate: { path: 'cinemaID', select: 'name location' } }
+                    { path: 'roomID', select: '_id roomNumber cinemaID', populate: { path: 'cinemaID', select: 'name location' } }
                 ]
             })
-            .populate('seattype') 
             .populate('order', 'status totalPrice') 
-            .sort({ createdAt: -1 }); 
+            .sort({ createdAt: -1 }).lean(); 
+
+        // Inject seat labels
+        for(let i=0;i<tickets.length;i++) {
+            let roomID = tickets[i].showtime.roomID._id;
+            tickets[i].seatLabel = await getRoomSeatLabelByIndex(roomID, tickets[i].seatIndex);
+        }
 
         res.status(200).json({ success: true, count: tickets.length, data: tickets });
     } catch (error) {

@@ -71,7 +71,7 @@ export const createOrder = async (req, res, next) => {
     }
 };
 
-// Confirm a pending order and create tickets
+// Confirm a pending order and create tickets. NOT USED. COPIED TO USE IN PAYMENT CONTROLLER
 export const confirmOrder = async (req, res, next) => {
     try {
         const { orderID } = req.params;
@@ -235,6 +235,10 @@ export const getOrdersByUserId = async (req, res, next) => {
 
         const orders = await Order.find({ userID: userID })
             // .populate('userID', 'username email')
+            .populate({
+                path: 'tickets',
+                model: 'Ticket'
+            })
              .populate({ 
                 path: 'showtime', 
                 populate: [{ 
@@ -261,8 +265,9 @@ export const getOrdersByUserId = async (req, res, next) => {
              return;
         }
 
+        // Inject seat labels
         for(let i=0;i<orders.length;i++) {
-            let seats = orders[i]._tempSeats;
+            let seats = orders[i]._tempSeats.length ? orders[i]._tempSeats : orders[i].tickets.map(ticket => ticket.seatIndex);
             let seatsLbl = Array(seats.length);
             let roomID = orders[i].showtime.roomID._id;
             for (let j=0;j<seats.length;j++) {

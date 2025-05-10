@@ -14,9 +14,9 @@ export const getPayUrlForOrder = async (req, res, next) => {
                     req.connection.remoteAddress ||
                     req.socket.remoteAddress ||
                     req.connection.socket.remoteAddress;
-    console.log(`Client IP?: ${clientIP}`)
+    // console.log(`Client IP?: ${clientIP}`)
     const {orderID} = req.params;
-    console.log(orderID);
+    // console.log(orderID);
 
     const order = await Order.findById(orderID);
 

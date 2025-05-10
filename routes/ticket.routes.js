@@ -13,6 +13,7 @@ const router = express.Router();
 // router.get('/', authenticate, authorize(['admin']), getAllTickets);
 router.get('/', getAllTickets); // For testing
 router.get('/:ticketID', getTicketById);
+router.get('/by-user/:userID', getTicketsByUserId);
 // Cancel ticket
 router.delete('/:ticketID', cancelTicket); 
 
