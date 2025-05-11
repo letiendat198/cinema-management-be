@@ -55,6 +55,37 @@ export const getTicketsByUserId = async (req, res, next) => {
     }
 };
 
+// Get tickets by Schedule ID
+export const getTicketsByScheduleId = async (req, res, next) => { 
+    try {
+        const { scheduleID } = req.params;
+        if (!mongoose.Types.ObjectId.isValid(scheduleID)) {
+            return next(new ErrorHandler("Invalid schedule ID", 400));
+        }
+
+        const tickets = await Ticket.find({ showtime: scheduleID }) 
+            .populate({
+                path: "showtime", 
+                populate: [ 
+                    { path: 'movieID', select: 'title img' }, 
+                    { path: 'roomID', select: '_id roomNumber cinemaID', populate: { path: 'cinemaID', select: 'name location' } }
+                ]
+            })
+            .populate('order', 'status totalPrice') 
+            .sort({ createdAt: -1 }).lean(); 
+
+        // Inject seat labels
+        for(let i=0;i<tickets.length;i++) {
+            let roomID = tickets[i].showtime.roomID._id;
+            tickets[i].seatLabel = await getRoomSeatLabelByIndex(roomID, tickets[i].seatIndex);
+        }
+
+        res.status(200).json({ success: true, count: tickets.length, data: tickets });
+    } catch (error) {
+        next(error);
+    }
+};
+
 export const getTicketById = async (req, res, next) => {
     try {
         const { ticketID } = req.params;

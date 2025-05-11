@@ -266,7 +266,8 @@ export const getOrdersByUserId = async (req, res, next) => {
         }
 
         // Inject seat labels
-        for(let i=0;i<orders.length;i++) {
+        for(let i=0;i<orders.length;i++) { // For each order
+            // Get seat indexes from tempSeats or tickets
             let seats = orders[i]._tempSeats.length ? orders[i]._tempSeats : orders[i].tickets.map(ticket => ticket.seatIndex);
             let seatsLbl = Array(seats.length);
             let roomID = orders[i].showtime.roomID._id;

@@ -4,6 +4,7 @@ import {
     getTicketsByUserId,
     getTicketById,
     cancelTicket,
+    getTicketsByScheduleId,
 } from '../controllers/ticket.controller.js';
 // import { authenticate, authorize } from '../middleware/auth.js';
 
@@ -14,6 +15,7 @@ const router = express.Router();
 router.get('/', getAllTickets); // For testing
 router.get('/:ticketID', getTicketById);
 router.get('/by-user/:userID', getTicketsByUserId);
+router.get('/by-schedule/:scheduleID', getTicketsByScheduleId);
 // Cancel ticket
 router.delete('/:ticketID', cancelTicket); 
 
