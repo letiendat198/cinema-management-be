@@ -14,6 +14,7 @@ const movieSchema = new Schema({
   year: Number,
   rating: Number,
   img: String,
+  bannerImage: String,
   like:{type: Number, default: 0},
   view:{type: Number, default: 0},
   description: String,

@@ -49,7 +49,7 @@ export const updateMovie = async (req, res, next) => {
     if (!movie) {
       return next(new ErrorHandler('Movie not found', 404));
     }
-    res.status(200).json({ success: true, data: movie });
+    res.status(200).json({ success: true, data: movie, message: "Movie details updated successfully" });
   } catch (error) {
     next(error);
   }
@@ -80,7 +80,7 @@ export const getMoviesByGenre = async (req, res, next) => {
 
 export const getPopularMovies = async (req, res, next) => {
   try {
-    const movies = await Movie.find().sort({ view: -1, like: -1 }).limit(10);
+    const movies = await Movie.find().sort({ like: -1, view: -1 }).limit(10);
     res.status(200).json({ success: true, data: movies });
   } catch (error) {
     next(error);
