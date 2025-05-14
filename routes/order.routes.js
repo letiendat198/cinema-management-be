@@ -1,7 +1,6 @@
 import express from 'express';
 import {
     createOrder,
-    confirmOrder,
     getAllOrders,
     getOrderById,
     getOrdersByUserId 
@@ -16,7 +15,6 @@ router.get('/', getAllOrders);
 router.post('/', createOrder); 
 router.get('/:orderID', getOrderById);
 router.get('/by-user/:userID', getOrdersByUserId);
-router.post('/:orderID/confirm', confirmOrder);
 
 
 export default router;

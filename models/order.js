@@ -32,7 +32,8 @@ const orderSchema = new mongoose.Schema({
         ref: "Schedule",
     },
     _tempSeats: { 
-        type: [Number], 
+        type: [mongoose.Schema.Types.ObjectId], 
+        ref: "Seat",
         required: true }
 }, { timestamps: true });
 

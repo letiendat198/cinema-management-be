@@ -93,12 +93,12 @@ export const vnPayIPNHandle = async (req, res, next) => {
         // Check if seats are still available
         const existingTickets = await Ticket.find({
             showtime: showtimeID,
-            seatIndex: { $in: seatsToBook },
+            seat: { $in: seatsToBook },
             status: { $in: ['booked'] } 
         });
 
         if (existingTickets.length > 0) {
-            const bookedLabels = existingTickets.map(t => t.seatIndex);
+            const bookedLabels = existingTickets.map(t => t.seat.label);
             throw new Error(`Seats are no longer available: ${bookedLabels.join(', ')}`); // 409 Conflict
         }
 
@@ -107,11 +107,11 @@ export const vnPayIPNHandle = async (req, res, next) => {
         const schedule = await Schedule.findById(showtimeID); // For checkinDate
         if (!schedule) throw new Error("Showtime schedule not found");
 
-        for (const seatIndex of seatsToBook) {
+        for (const seat of seatsToBook) {
             const ticket = new Ticket({
                 order: order._id,
                 showtime: showtimeID,
-                seatIndex: seatIndex,
+                seat: seat,
                 user: order.userID,
                 status: 'booked',
                 checkinDate: schedule.startTime 

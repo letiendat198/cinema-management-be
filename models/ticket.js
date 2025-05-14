@@ -11,9 +11,10 @@ const ticketSchema = new Schema({
     ref: "Schedule",
     required: true 
   },
-  seatIndex: {
-    type: Number,
-    required: [true, "Seat index is required"] 
+  seat: {
+    type: Schema.Types.ObjectId, 
+    ref: "Seat",
+    required: true
   },
   user: {
     type: Schema.Types.ObjectId,

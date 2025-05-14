@@ -40,14 +40,9 @@ export const getTicketsByUserId = async (req, res, next) => {
                     { path: 'roomID', select: '_id roomNumber cinemaID', populate: { path: 'cinemaID', select: 'name location' } }
                 ]
             })
-            .populate('order', 'status totalPrice') 
+            .populate('order', 'status totalPrice')
+            .populate('seat') 
             .sort({ createdAt: -1 }).lean(); 
-
-        // Inject seat labels
-        for(let i=0;i<tickets.length;i++) {
-            let roomID = tickets[i].showtime.roomID._id;
-            tickets[i].seatLabel = await getRoomSeatLabelByIndex(roomID, tickets[i].seatIndex);
-        }
 
         res.status(200).json({ success: true, count: tickets.length, data: tickets });
     } catch (error) {
@@ -72,13 +67,8 @@ export const getTicketsByScheduleId = async (req, res, next) => {
                 ]
             })
             .populate('order', 'status totalPrice') 
+            .populate('seat')
             .sort({ createdAt: -1 }).lean(); 
-
-        // Inject seat labels
-        for(let i=0;i<tickets.length;i++) {
-            let roomID = tickets[i].showtime.roomID._id;
-            tickets[i].seatLabel = await getRoomSeatLabelByIndex(roomID, tickets[i].seatIndex);
-        }
 
         res.status(200).json({ success: true, count: tickets.length, data: tickets });
     } catch (error) {
