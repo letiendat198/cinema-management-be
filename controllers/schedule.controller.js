@@ -3,6 +3,7 @@ import { Schedule } from "../models/schedule.js";
 import { Ticket } from "../models/ticket.js"; 
 import ErrorHandler from "../utils/errorHandler.js";
 import mongoose from 'mongoose';
+import dayjs from "dayjs";
 
 export const getSchedulesByMovieID = async (req, res, next) => {
   try {
@@ -26,6 +27,16 @@ export const addSchedule = async (req, res, next) => {
     
     if (!movieID || !roomID || !startTime || !endTime) {
       return next(new ErrorHandler("All fields are required", 400));
+    }
+
+    if (!dayjs(startTime).isBefore(dayjs(endTime))) {
+      return next(new ErrorHandler("Start time must happens before end time", 400));
+    }
+
+    const existedSchedule = await Schedule.find({roomID});
+    for (let schedule of existedSchedule) {
+      if (!(dayjs(schedule.startTime).isAfter(dayjs(endTime)) || dayjs(schedule.endTime).isBefore(dayjs(startTime)))) 
+        return next(new ErrorHandler("New schedule for this room collides with another schedule", 409));
     }
     
     const newSchedule = new Schedule({ movieID, roomID, startTime, endTime });
