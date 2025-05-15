@@ -28,6 +28,10 @@ const movieSchema = new Schema({
     enum: ['P', 'K', 'T13','T16', 'T18'],
     default: 'P'
   },
-  trailer: String
+  trailer: String,
+  unlisted: {
+    type: Boolean,
+    default: false
+  },
 })
 export const Movie = mongoose.model.Movie || model('Movie', movieSchema)
