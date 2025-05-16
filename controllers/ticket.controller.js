@@ -2,7 +2,6 @@ import { Ticket } from "../models/ticket.js"; // Correct import if model file is
 import ErrorHandler from "../utils/errorHandler.js"; // Assuming you have this
 import mongoose from 'mongoose';
 import { Schedule } from "../models/schedule.js";
-import { getRoomSeatLabelByIndex } from "../models/seatmap.js";
 export const getAllTickets = async (req, res, next) => {
     try {
         const tickets = await Ticket.find()

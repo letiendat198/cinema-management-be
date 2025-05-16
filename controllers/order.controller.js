@@ -4,7 +4,6 @@ import { Seat } from '../models/seat.js';
 import { ComplementItem } from '../models/complementitem.js';
 import { User } from '../models/user.js';
 import { Schedule } from '../models/schedule.js'; 
-import { getRoomSeatLabelByIndex, SeatMap } from '../models/seatmap.js';
 import ErrorHandler from '../utils/errorHandler.js';
 import mongoose, { model } from 'mongoose';
 // Dont have discount

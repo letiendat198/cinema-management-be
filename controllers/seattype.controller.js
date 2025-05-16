@@ -15,7 +15,7 @@ export const createSeatType = async (req, res, next) => {
     const existedValue = await SeatType.findOne({value: seatType.value});
     if (existedValue) res.status(400).json({ success: false, message: 'Seat type value already used' });
     await seatType.save();
-    res.status(201).json({ success: true, data: seatType });
+    res.status(201).json({ success: true, data: seatType, message: 'Seat type added successfully' });
   } catch (error) {
     next(error);
   }
@@ -28,7 +28,7 @@ export const updateSeatType = async (req, res, next) => {
     if (!seatType) {
       return res.status(404).json({ success: false, message: 'SeatType not found' });
     }
-    res.status(200).json({ success: true, data: seatType });
+    res.status(200).json({ success: true, data: seatType, message: 'Seat type updated successfully' });
   } catch (error) {
     next(error);
   }
