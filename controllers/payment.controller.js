@@ -32,7 +32,7 @@ export const getPayUrlForOrder = async (req, res, next) => {
     params['vnp_Locale'] = 'vn';
     params['vnp_OrderInfo'] = `Thanh+toan+hoa+don+${orderID}`;
     params['vnp_OrderType'] = 'other';
-    params['vnp_ReturnUrl'] = 'http://localhost:5173/verify-payment';
+    params['vnp_ReturnUrl'] = 'https://black-beach-039414a00.6.azurestaticapps.net/verify-payment';
     // params['vnp_ExpireDate'] = dayjs().add(10, 'minute').format("YYYYMMDDHHmmss");
     params['vnp_TxnRef'] = orderID + '-' + dayjs().format("YYYYMMDDHHmmss"); // Avoid VNPay limit of 1 unique TxnRef per day
     // params['vnp_SecureHash'] = process.env.VNPAY_SECURE_HASH;
