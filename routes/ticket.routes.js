@@ -6,7 +6,6 @@ import {
     cancelTicket,
     getTicketsByScheduleId,
 } from '../controllers/ticket.controller.js';
-// import { authenticate, authorize } from '../middleware/auth.js';
 
 const router = express.Router();
 
