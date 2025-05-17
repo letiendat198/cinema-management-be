@@ -3,7 +3,6 @@ import mongoose from 'mongoose'
 import dotenv from 'dotenv'
 import cookieParser from 'cookie-parser'
 import cors from 'cors'
-// import "./job/jobs.js"; 
 import { errorHandler } from "./middleware/errorHandler.js";
 
 import userRoutes from './routes/user.routes.js';
@@ -52,10 +51,9 @@ mongoose.connect(mongoURI,{})
       app.listen(PORT, () => {
           console.log(`Server is running on port ${PORT}`)
       });
-      // Start cron jobs after successful connection if needed
       // import("./job/jobs.js");
   })
   .catch((err) => {
     console.error("Database connection error:", err)
-    process.exit(1); // Exit if DB connection fails
+    process.exit(1);
   })

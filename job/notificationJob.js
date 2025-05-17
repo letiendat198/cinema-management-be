@@ -66,7 +66,7 @@ const sendReminderNotifications = async () => {
         <p>Chào ${ticket.user.username || 'bạn'},</p>
         <p>Phim <strong>${movieTitle}</strong> của bạn sẽ bắt đầu vào lúc ${showtimeFormatted} tại phòng ${roomName}, ${cinemaName}.</p>
         <p>Vui lòng đến sớm để ổn định chỗ ngồi. Chúc bạn xem phim vui vẻ!</p>
-        <p>Trân trọng,<br/>Đội ngũ Cinema XYZ</p>
+        <p>Trân trọng,<br/>Đội ngũ Cinemax</p>
       `;
 
       const emailSent = await sendEmail({
