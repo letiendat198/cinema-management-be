@@ -46,8 +46,8 @@ export const updateSeats = async (req, res, next) => {
   try {
     const updatedSeats = req.body;
     
-    let seatType = await SeatType.findById(updatedSeats.seatType)
-    if (seatType.value < 0) return res.status(404).json({ success: false, message: `Seat type value must be >=0` });
+    // let seatType = await SeatType.findById(updatedSeats.seatType);
+    // if (seatType.value < 0) return res.status(404).json({ success: false, message: `Seat type value must be >=0` });
 
     for (let seat of updatedSeats) {
         const status = await Seat.findByIdAndUpdate(seat._id, seat, { new: true, runValidators: true });    
