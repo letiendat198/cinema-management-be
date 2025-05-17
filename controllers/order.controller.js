@@ -48,8 +48,7 @@ export const createOrder = async (req, res, next) => {
 
       // Check for booked seat to ensure no error is in confirmOrder, shouldve been here
         const schedule = await Schedule.findById(showtime);
-        const seatMapData = await SeatMap.findOne({roomID: schedule.roomID});
-        const totalPrice = await calculateTotalPrice(seatsID, complementItemsData, seatMapData.valueMap);
+        const totalPrice = await calculateTotalPrice(seatsID, complementItemsData);
 
         const orderData = {
             userID: userID,
